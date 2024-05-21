@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
@@ -8,8 +8,6 @@ const port = process.env.PORT || 5000;
 //Middleware
 app.use(cors())
 app.use(express.json())
-
-console.log(process.env.DB_USER)
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.qm4wct2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -31,9 +29,37 @@ async function run() {
     const itemsCollection = client.db('paintingDrawing').collection('items');
 
     app.get('/items', async(req, res) => {
+      
       const items = req.body;
+      
       const cursore = itemsCollection.find(items);
       const result = await cursore.toArray();
+      res.send(result)
+    })
+
+    app.get('/items/:id', async(req, res) => {
+      const id = req.params.id;
+      const quary = { _id: new ObjectId(id)}
+      const result = await itemsCollection.findOne(quary);
+    
+      res.send(result)
+    })
+
+    app.get('/my-items', async(req, res) => {
+      let query = {}
+      if(req.query?.email){
+        query = {email: req.query?.email}
+      }
+     
+      const cursor = itemsCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.delete('/my-items/:id', async(req, res) => {
+      const id = req.params.id
+      const quary = {_id: new ObjectId(id)}
+      const result = await itemsCollection.deleteOne(quary);
       res.send(result)
     })
 
@@ -42,6 +68,8 @@ async function run() {
       const result = await itemsCollection.insertOne(items)
       res.send(result)
     })
+
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
