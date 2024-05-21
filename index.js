@@ -28,48 +28,74 @@ async function run() {
 
     const itemsCollection = client.db('paintingDrawing').collection('items');
 
-    app.get('/items', async(req, res) => {
-      
+    app.get('/items', async (req, res) => {
+
       const items = req.body;
-      
+
       const cursore = itemsCollection.find(items);
       const result = await cursore.toArray();
       res.send(result)
     })
 
-    app.get('/items/:id', async(req, res) => {
-      const id = req.params.id;
-      const quary = { _id: new ObjectId(id)}
-      const result = await itemsCollection.findOne(quary);
     
+
+    app.get('/items/:id', async (req, res) => {
+      const id = req.params.id;
+      const quary = { _id: new ObjectId(id) }
+      const result = await itemsCollection.findOne(quary);
+
       res.send(result)
     })
 
-    app.get('/my-items', async(req, res) => {
+    
+    app.get('/my-items', async (req, res) => {
       let query = {}
-      if(req.query?.email){
-        query = {email: req.query?.email}
+      if (req.query?.email) {
+        query = { email: req.query?.email }
       }
-     
+
       const cursor = itemsCollection.find(query);
       const result = await cursor.toArray();
       res.send(result)
+    });
+
+    app.patch('/my-items/:id', async (req, res) => {
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) };
+      const item = req.body
+      // const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          imgurl: item.imgurl,
+          subCatagoryName: item.subCatagoryName,
+          descriptions: item.descriptions,
+          price: item.price,
+          rating: item.rating,
+          customization: item.customization,
+          processingtime: item.processingtime,
+          options: item.options,
+          username: item.username
+        }
+      }
+      
+      const result = await itemsCollection.updateOne(filter, updateDoc);
+      res.send(result)
     })
 
-    app.delete('/my-items/:id', async(req, res) => {
+    app.delete('/my-items/:id', async (req, res) => {
       const id = req.params.id
-      const quary = {_id: new ObjectId(id)}
+      const quary = { _id: new ObjectId(id) }
       const result = await itemsCollection.deleteOne(quary);
       res.send(result)
     })
 
-    app.post('/items', async(req, res) => {
+    app.post('/items', async (req, res) => {
       const items = req.body;
-      const result = await itemsCollection.insertOne(items)
+      const result = await itemsCollection.insertOne(items);
       res.send(result)
     })
 
-    
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -83,8 +109,8 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Painting and Drawing resver is runnig')
+  res.send('Painting and Drawing resver is runnig')
 })
 app.listen(port, () => {
-    console.log(`painting and drawing running on port ${port}`)
+  console.log(`painting and drawing running on port ${port}`)
 })
