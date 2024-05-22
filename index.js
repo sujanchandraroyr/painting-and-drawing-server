@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 //Middleware
-app.use(cors())
+app.use(cors({origin: ['http://localhost:5173', 'https://painting-and-drawing-ae0df.web.app', 'https://painting-and-drawing-ae0df.firebaseapp.com']}))
 app.use(express.json())
 
 
@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const itemsCollection = client.db('paintingDrawing').collection('items');
 
